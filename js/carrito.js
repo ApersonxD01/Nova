@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function () {
     const carrito = document.querySelector(".carrito-compras");
     const contenedorCarrito = document.getElementById("carritoCompras");
@@ -6,13 +5,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const botonComprar = document.getElementById("comprarCarrito");
     const mensajeCompra = document.getElementById("mensajeCompra");
 
-    if (!carrito || !contenedorCarrito) {
+    if (
+        !carrito ||
+        !contenedorCarrito ||
+        !totalCarrito ||
+        !botonComprar
+    ) {
         return;
     }
 
     let productosCarrito = [];
 
-    // Crear el botón del carrito en la esquina superior derecha
+    // Crear el botón flotante del carrito
     const botonAbrirCarrito = document.createElement("button");
     botonAbrirCarrito.className = "boton-abrir-carrito";
     botonAbrirCarrito.type = "button";
@@ -27,15 +31,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const contadorCarrito = document.getElementById("contadorCarrito");
 
-    // Ocultar el carrito hasta que se presione el botón
+    // Ocultar el carrito al iniciar
     carrito.style.display = "none";
 
+    // Abrir y cerrar el carrito
     botonAbrirCarrito.addEventListener("click", function () {
         carrito.style.display =
             carrito.style.display === "none" ? "block" : "none";
     });
 
-    // Mostrar los productos y actualizar el total
+    // Actualizar el contenido del carrito
     function actualizarCarrito() {
         contenedorCarrito.innerHTML = "";
 
@@ -64,11 +69,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Subtotal: ₡" +
                 (producto.precio * producto.cantidad).toLocaleString("es-CR");
 
+            // Botón para disminuir cantidad
             const botonMenos = document.createElement("button");
             botonMenos.type = "button";
             botonMenos.textContent = "−";
             botonMenos.className = "boton-cantidad";
-            botonMenos.setAttribute("aria-label", "Disminuir cantidad");
 
             botonMenos.addEventListener("click", function () {
                 producto.cantidad--;
@@ -80,17 +85,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 actualizarCarrito();
             });
 
+            // Botón para aumentar cantidad
             const botonMas = document.createElement("button");
             botonMas.type = "button";
             botonMas.textContent = "+";
             botonMas.className = "boton-cantidad";
-            botonMas.setAttribute("aria-label", "Aumentar cantidad");
 
             botonMas.addEventListener("click", function () {
                 producto.cantidad++;
                 actualizarCarrito();
             });
 
+            // Botón para quitar producto
             const botonQuitar = document.createElement("button");
             botonQuitar.type = "button";
             botonQuitar.textContent = "Quitar";
@@ -112,10 +118,12 @@ document.addEventListener("DOMContentLoaded", function () {
             contenedorCarrito.appendChild(elemento);
         });
 
+        // Calcular el total
         const total = productosCarrito.reduce(function (suma, producto) {
             return suma + producto.precio * producto.cantidad;
         }, 0);
 
+        // Calcular la cantidad total de artículos
         const cantidadTotal = productosCarrito.reduce(function (suma, producto) {
             return suma + producto.cantidad;
         }, 0);
@@ -127,12 +135,12 @@ document.addEventListener("DOMContentLoaded", function () {
         botonComprar.disabled = productosCarrito.length === 0;
     }
 
-    // Agregar productos desde las tarjetas
+    // Agregar productos al carrito
     document.querySelectorAll(".boton-agregar-carrito").forEach(function (boton) {
         boton.addEventListener("click", function () {
             const nombre = boton.dataset.producto;
             const precio = Number(
-                boton.dataset.precio.replace(/[^\d]/g, "")
+                (boton.dataset.precio || "").replace(/[^\d]/g, "")
             );
 
             if (!nombre || !Number.isFinite(precio) || precio <= 0) {
@@ -154,7 +162,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             }
 
-            mensajeCompra.textContent = "";
+            if (mensajeCompra) {
+                mensajeCompra.textContent = "";
+            }
+
             actualizarCarrito();
         });
     });
@@ -168,7 +179,12 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("¡Gracias por comprar en NovaMarket CR!");
 
         productosCarrito = [];
-        mensajeCompra.textContent = "¡Compra realizada correctamente!";
+
+        if (mensajeCompra) {
+            mensajeCompra.textContent =
+                "¡Compra realizada correctamente!";
+        }
+
         actualizarCarrito();
     });
 
